@@ -1,0 +1,90 @@
+import random
+
+class User:
+    def __init__(self, username, referrer=None):
+        self.username = username
+        self.balance = 0.0
+        self.referrer = referrer
+        self.referred_users = []  # List of users referred by this user
+
+    def earn_crypto(self):
+        earnings = random.uniform(0.001, 0.01)  # Random crypto amount
+        self.balance += earnings
+
+        # Referral bonus for direct referrer
+        if self.referrer:
+            direct_bonus = earnings * 0.20
+            self.referrer.balance += direct_bonus
+            print(f"{self.referrer.username} earned 20% referral bonus ({direct_bonus:.6f} BTC)")
+
+            # Indirect referral bonus (4%)
+            if self.referrer.referrer:
+                indirect_bonus = earnings * 0.04
+                self.referrer.referrer.balance += indirect_bonus
+                print(f"{self.referrer.referrer.username} earned 4% indirect referral bonus ({indirect_bonus:.6f} BTC)")
+
+        print(f"{self.username} earned {earnings:.6f} BTC!")
+
+    def show_balance(self):
+        print(f"{self.username}'s balance: {self.balance:.6f} BTC")
+
+class CryptoApp:
+    def __init__(self):
+        self.users = {}  # Dictionary to store users by username
+
+    def add_user(self, username, referrer_username=None):
+        if username in self.users:
+            print("Username already exists. Choose a different name.")
+            return None
+
+        referrer = self.users.get(referrer_username)
+        user = User(username, referrer)
+        self.users[username] = user
+
+        if referrer:
+            referrer.referred_users.append(user)
+
+        print(f"User {username} added successfully.")
+        return user
+
+    def main_menu(self):
+        print("\n--- Crypto Earning App with Referral System ---")
+        while True:
+            print("\nOptions:")
+            print("1. Register New User")
+            print("2. Earn Crypto")
+            print("3. Show User Balance")
+            print("4. Exit")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                username = input("Enter a username: ")
+                referrer_username = input("Enter referrer's username (leave blank if none): ").strip() or None
+                self.add_user(username, referrer_username)
+
+            elif choice == "2":
+                username = input("Enter your username: ")
+                user = self.users.get(username)
+                if user:
+                    user.earn_crypto()
+                else:
+                    print("User not found.")
+
+            elif choice == "3":
+                username = input("Enter your username: ")
+                user = self.users.get(username)
+                if user:
+                    user.show_balance()
+                else:
+                    print("User not found.")
+
+            elif choice == "4":
+                print("Exiting the app. Goodbye!")
+                break
+
+            else:
+                print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    app = CryptoApp()
+    app.main_menu()
